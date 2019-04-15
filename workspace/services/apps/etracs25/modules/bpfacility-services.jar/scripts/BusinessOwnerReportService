@@ -1,0 +1,35 @@
+import com.rameses.annotations.*;
+import com.rameses.common.*;
+
+
+class BusinessOwnerReportService{
+	//to access server services
+	@Service("DateService")
+	def dtSvc;
+
+	//to access a data model
+	@DataContext('business')
+	def em_business
+
+
+	//references an sql resource file
+	@ActiveDB('business_owner_report')
+	def em
+
+	@ProxyMethod
+	public def getBusinesses (owner){
+		return em_business
+					.select('objid,state,bin,businessname,address.text,currentapplicationid')
+				 	.find([owner_objid:owner.objid])
+				 	.orderBy('bin')
+				 	.list()			 
+		
+	}
+
+	
+	@ProxyMethod
+	public def getUnpaidApplications(business){
+		return em.getUnpaidApplications(business);					
+				 
+	}
+}

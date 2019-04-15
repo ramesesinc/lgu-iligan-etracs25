@@ -1,0 +1,5 @@
+provider=script
+app.host=110.100.211.2:8070
+app.cluster=osiris3
+app.context=etracs25
+readTimeout=60000

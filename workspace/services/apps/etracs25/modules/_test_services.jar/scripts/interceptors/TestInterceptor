@@ -1,0 +1,19 @@
+import com.rameses.annotations.*;
+
+class TestInterceptor {
+
+	@Before(pattern="Persistence.create", eval="#{ args[0]._schemaname == 'itemaccount' }")
+	public void beforeItemAccountCreate( evt ) {
+		def param = evt.args[0]; 
+		param.debug = true; 
+		println '** beforeItemAccountCreate'
+		param.each{
+			println '> '+ it; 
+		}
+	}
+
+	@After(pattern="Persistence.create", eval="#{ args[0]._schemaname == 'itemaccount' }")
+	public void afterItemAccountCreate( evt ) {
+	}
+
+}
