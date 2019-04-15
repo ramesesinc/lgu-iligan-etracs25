@@ -1,0 +1,4 @@
+e download ni ol, then change the filename to gov-lgu-iligan.jar
+e paste didto sa folder {ETRACS_SERVER_DIR}\workspace\web\resources\downloads\modules\
+then increment its jar version in updates.xml
+close all etracs client

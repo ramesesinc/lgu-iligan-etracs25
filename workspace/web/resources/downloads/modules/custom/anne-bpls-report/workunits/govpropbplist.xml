@@ -1,0 +1,33 @@
+<workunit extends="wtemplates/ReportController.xml">
+
+	<invokers>
+		<invoker type="home.action" caption="Businesses on Government Property List" domain="BPLS"/>
+                <invoker folderid="/explorer/report/bpls" caption="Businesses on Government Property List" domain="BPLS"/>
+	</invokers>
+
+	<code>
+	<![CDATA[
+
+	import com.rameses.rcp.annotations.*;
+	import com.rameses.rcp.common.*;
+	import com.rameses.osiris2.client.*;
+	import com.rameses.osiris2.reports.*;
+        import com.rameses.osiris2.common.*;
+
+	class SampleReport extends DBReportModel{
+                String title= "Businesses on Government Property List";
+		String reportName="reports/GovPropBusiness.jasper";
+                //def flag="page1";
+		List formControls=[
+			[name:'query.searchtext', type:'text', caption:'Location']
+                        //[name:'query.searchtext', type:'lookup', caption:'Governtment Property',handler: 'bldgname:lookup']
+		];
+                //flag="page2";
+	}
+        /*def back(){
+            flag="page1";
+            return "default";
+        }*/
+	]]>
+	</code>
+</workunit>
