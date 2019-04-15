@@ -1,0 +1,52 @@
+import com.rameses.annotations.*
+import com.rameses.common.*;
+import com.rameses.services.extended.*;
+
+class FAASLookupService
+{
+	@ActiveDB('faas')
+	def em 
+	
+	@Service('RPTUtil')
+	def utilSvc
+	
+
+	@ProxyMethod
+	public def lookupFaas( params ) {
+		params.fixfilters = ''
+		params.filters    = ''
+		params.orderby    = ''
+
+		if (params.objid){
+			params.fixfilters += ' and objid = $P{objid} '
+		}
+		if (params.state){
+			params.fixfilters += ' and state = $P{state} '
+		}
+		if (params.rputype){
+			params.fixfilters += ' and rputype = $P{rputype} '
+		}
+		if (params.taxpayerid){
+			params.fixfilters += ' and taxpayer_objid = $P{taxpayerid}'
+		}
+
+		if (params.searchtext){
+			params.orderby = ' order by tdno '
+			params.searchtext 	= (params.searchtext ? params.searchtext : '') + '%';
+			def filters = [
+				' and tdno LIKE $P{searchtext} ',
+				' and pin LIKE $P{searchtext} ',
+				' and owner_name LIKE $P{searchtext} ',
+				' and cadastrallotno LIKE $P{searchtext} ',
+				' and blockno LIKE $P{searchtext} ',
+				' and surveyno LIKE $P{searchtext} ',
+			]
+			return utilSvc.getListFromQuery('faas:getLookupFaas', filters, params, 'objid');
+		}
+		else{
+			return em.getLookupFaas(params)
+		}
+	}
+
+}
+
