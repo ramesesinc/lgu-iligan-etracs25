@@ -1,6 +1,7 @@
 <schema adapter="eor"> 
 	<element tablename="eor_paymentorder">
 		<field name="objid" primary="true"/>
+		<field name="state" />
 		<field name="txndate" type="timestamp" required="true" />
 		<field name="txntype" required="true" />
 		<field name="txntypename" required="true" />

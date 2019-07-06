@@ -41,9 +41,9 @@ class RemittanceInterceptor {
 		if ( !o.node?.state ) return;
 
 		if ( o.node.state == 'POSTED' ) {
-			o.orderBy = ' controldate desc '; 
+			o.orderBy = ' controldate desc, dtposted desc '; 
 		} else {
-			o.orderBy = ' controldate '; 
+			o.orderBy = ' controldate, dtposted '; 
 		}
 
 		//o.debug = true;

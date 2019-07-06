@@ -20,7 +20,6 @@ class QueueMgmtService {
 		qg.create(m);
 		m.sections.each {
 			it.groupid = m.objid;
-			it.currentseries = 0;
 			qgsection.create(it);
 		}
 	}

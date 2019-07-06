@@ -217,7 +217,7 @@ from (
 )t1, fund 
 where fund.objid = t1.fundid ${fundfilter} 
 group by t1.fundid, fund.title, t1.acctid, t1.acctcode, t1.acctname 
-having sum(t1.amount)-sum(t1.share) <> 0 
+having sum(t1.amount)-sum(t1.share) > 0 
 order by fund.title, t1.acctcode 
 
 

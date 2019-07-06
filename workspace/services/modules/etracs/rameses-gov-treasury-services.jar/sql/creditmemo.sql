@@ -12,7 +12,6 @@ FROM creditmemo cm
 INNER JOIN bankaccount ba ON cm.bankaccount_objid = ba.objid
 INNER JOIN itemaccount ia ON ba.acctid = ia.objid 
 WHERE cm.objid = $P{objid}
-GROUP BY ba.fund_objid, ba.objid, ba.acctid, ia.code, ia.title 
 
 [getIncomeLedgerItems]
 SELECT 

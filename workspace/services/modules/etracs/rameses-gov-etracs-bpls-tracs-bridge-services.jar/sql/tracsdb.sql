@@ -6,6 +6,7 @@ SELECT * FROM (
       b.strTradeName AS tradename, 
       strBusinessAddress AS address,
       ta.intyear AS activeyear, 
+      ta.inttype, 
       t.strTaxpayer AS name, 
       t.strTaxpayerID AS ownerid, 
       t.strTaxpayer AS ownername, 
@@ -16,8 +17,8 @@ SELECT * FROM (
       INNER JOIN tblAssessment ta on ta.strBusinessID = b.ObjID 
 )i 
 WHERE NOT EXISTS (SELECT 1 FROM etracs25_capture_business bb WHERE bb.oldbusinessid=i.objid) 
-${filter} 
-ORDER BY i.activeyear DESC 
+   AND i.inttype in (0,1,6,7) ${filter} 
+ORDER BY i.activeyear DESC,  i.tradename 
 
 
 [getInfo]
@@ -29,8 +30,12 @@ select
    a.objid as applicationid, 
    case stat.strtype 
       WHEN 'RENEWAL' THEN 'RENEW'
+      WHEN 'REASSESSED (RENEW)' THEN 'RENEW'
+      WHEN 'REASSESSED (NEW)' THEN 'NEW'
+      WHEN 'ADDITIONAL' THEN 'NEW'
       ELSE stat.strtype 
    end AS apptype, 
+   a.dtassessmentdate as dtfiled,
    a.intyear as activeyear, 
    intYearStarted as yearstarted, 
    t.strTaxpayer as business_owner_name, 
@@ -54,6 +59,7 @@ from tblBusiness b
    inner join (
       select strbusinessid, max(intyear) as intyear 
       from tblAssessment 
+      where strbusinessid = $P{objid} 
       group by strbusinessid 
    )g ON b.objid=g.strbusinessid 
    inner join tblAssessment a ON (g.strbusinessid=a.strbusinessid AND g.intyear=a.intyear) 
@@ -62,61 +68,77 @@ from tblBusiness b
    inner join tblBPLedger bpl on bpl.strBusinessID = b.ObjID 
    left join tblIndividualTaxpayer it ON it.ObjID=t.strTaxpayerID
    left join etracs25_capture_entity e ON e.oldentityid = b.strTaxpayerID
-where b.ObjID=$P{objid}
+where b.ObjID = $P{objid} 
+   and a.inttype in (0,1,2,6,7) 
 
 
 [getLobs]
 SELECT DISTINCT 
-   bl.objid as oldlobid,
-   bl.strbusinessline as oldlobname, 
-   bl.strbusinessline as oldname, 
-   CASE stat.strtype 
-      WHEN 'RENEWAL' THEN 'RENEW'
-      ELSE stat.strtype 
-   END AS assessmenttype,
-   cl.lob_objid AS lobid, 
-   cl.lob_name AS name 
-FROM tblAssessment a
-   INNER JOIN tblAssessmentBO bo ON bo.parentid=a.objid
-   INNER JOIN tblBusinessLine bl ON bo.strBusinessLineID=bl.objid 
-   INNER JOIN sysTblAssessmentType stat ON a.inttype=stat.objid 
-   LEFT JOIN etracs25_capture_lob cl ON bl.objid=cl.oldlob_objid 
-WHERE a.objid=$P{objid} AND a.inttype NOT IN ( 2,10 )
+   oldlobid, oldlobname, oldname, assessmenttype, lobid, name 
+FROM ( 
+   SELECT TOP 100 PERCENT 
+      bl.objid as oldlobid,
+      bl.strbusinessline as oldlobname, 
+      bl.strbusinessline as oldname, 
+      CASE stat.strtype 
+         WHEN 'RENEWAL' THEN 'RENEW'
+         WHEN 'REASSESSED (RENEW)' THEN 'RENEW'
+         WHEN 'REASSESSED (NEW)' THEN 'NEW'
+         WHEN 'ADDITIONAL' THEN 'NEW'
+         ELSE stat.strtype 
+      END AS assessmenttype,
+      cl.lob_objid AS lobid, 
+      cl.lob_name AS name, 
+      a.dtassessmentdate as assessmentdate  
+   FROM tblAssessment a
+      INNER JOIN tblAssessmentBO bo ON bo.parentid = a.objid
+      INNER JOIN tblBusinessLine bl ON bl.objid = bo.strBusinessLineID 
+      INNER JOIN sysTblAssessmentType stat ON stat.objid = a.inttype 
+      LEFT JOIN etracs25_capture_lob cl ON cl.oldlob_objid = bl.objid 
+   WHERE a.objid = $P{objid} 
+      AND a.inttype IN (0,1,4,6,7)
+   ORDER BY a.dtassessmentdate, bl.strbusinessline 
+)t1 
 
 
 [getReceivables]
-SELECT * FROM (
-   SELECT 
-      tb.objid,
+select 
+   ('TRACSBR-'+ convert(varchar(50), NEWID())) as objid, 
+   t1.businessid, t1.yearapplied, t1.[year], t1.assessmenttype, 
+   case tfa.stracctType 
+      when 'FEE' then 'REGFEE' 
+      when 'TAX' then 'TAX' 
+      else 'OTHERCHARGE' 
+   end AS taxfeetype, 
+   bl.objid AS oldlob_objid, bl.strbusinessline AS oldlob_name,
+   clob.lob_objid, clob.lob_name, 
+   t1.acctid AS oldaccount_objid, tfa.strAcctCode AS oldaccount_code, tfa.strDescription AS oldaccount_title, 
+   ca.account_objid, ca.account_title, 
+   t1.amount, t1.amtpaid, t1.balance 
+from ( 
+   select 
+      b.strBusinessId as businessid, ta.objid as applicationid, ta.intyear AS yearapplied, 
+      ta.intyear AS [year], tb.strBusinessLineID as lobid, tb.strAcctID as acctid, 
+      sum(tb.curAmount) AS amount, sum(tb.curAmtPaid) AS amtpaid, 
+      sum(tb.curAmount - tb.curAmtPaid) AS balance, 
       case stat.strtype 
          WHEN 'RENEWAL' THEN 'RENEW'
-         ELSE stat.strtype 
-      end AS assessmenttype, 
-      b.strBusinessId AS businessid,
-      CASE tfa.stracctType 
-         WHEN 'OTHER CHARGE' THEN 'OTHERCHARGE' 
-         WHEN 'FEE' THEN 'REGFEE' 
-         WHEN 'TAX' THEN 'TAX' 
-      END AS taxfeetype,
-      ta.intyear AS yearapplied, ta.intyear AS [year],
-      bl.objid AS oldlob_objid, bl.strbusinessline AS oldlob_name,
-      clob.lob_objid, clob.lob_name, 
-      tb.strAcctID AS oldaccount_objid,
-      tfa.strAcctCode AS oldaccount_code,
-      tfa.strDescription AS oldaccount_title,
-      ca.account_objid, ca.account_title,
-      tb.curAmount AS amount, 
-      tb.curAmtPaid AS amtpaid, 
-      (tb.curAmount-tb.curAmtPaid) AS balance 
-   FROM tblassessment ta 
-      INNER JOIN tblBPLedgerBill tb ON ta.objid=tb.strassessmentid 
-      INNER JOIN tblBPLedger b ON b.objid=tb.parentid 
-      INNER JOIN sysTblAssessmentType stat ON ta.inttype=stat.objid 
-      INNER JOIN tblTaxFeeAccount tfa ON tfa.objid=tb.strAcctID 
-      LEFT JOIN tblBusinessLine bl ON bl.objid=tb.strBusinessLineID 
-      LEFT JOIN etracs25_capture_lob clob ON bl.objid=clob.oldlob_objid 
-      LEFT JOIN etracs25_capture_account ca ON tb.stracctid=ca.oldaccount_objid 
-   WHERE ta.objid=$P{objid} 
-)bt 
-WHERE bt.balance > 0 
-ORDER BY bt.year DESC
+         WHEN 'REASSESSED (RENEW)' THEN 'RENEW'
+         WHEN 'REASSESSED (NEW)' THEN 'NEW'
+         WHEN 'ADDITIONAL' THEN 'NEW' 
+         else stat.strtype 
+      end AS assessmenttype 
+   from tblassessment ta 
+      inner join tblBPLedgerBill tb ON tb.strassessmentid = ta.objid  
+      inner join tblBPLedger b ON b.objid = tb.parentid 
+      inner join sysTblAssessmentType stat ON stat.objid = ta.inttype  
+   where ta.objid = $P{objid} 
+   group by b.strBusinessId, ta.objid, ta.intyear, tb.strBusinessLineID, tb.strAcctID, stat.strtype  
+   having sum(tb.curAmount - tb.curAmtPaid) > 0 
+)t1 
+   inner join tblTaxFeeAccount tfa ON tfa.objid = t1.acctid 
+   left join tblBusinessLine bl ON bl.objid = t1.lobid 
+   left join etracs25_capture_lob clob ON clob.oldlob_objid = t1.lobid 
+   left join etracs25_capture_account ca ON ca.oldaccount_objid = t1.acctid 
+order by 
+   (case tfa.stracctType when 'TAX' then 0 when 'FEE' then 1 else 2 end), tfa.strDescription 
