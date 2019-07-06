@@ -1,0 +1,103 @@
+=========================================
+2019-07-06: ETRACS 2.5 PATCH ETRACS 
+=========================================
+
+-----------------------------------------
+ ABOUT THE PATCH 
+-----------------------------------------
+* Update ETRACS 2.5
+
+
+-----------------------------------------
+ SERVER UPDATE: 
+-----------------------------------------
+01. Backup Everything: 
+
+    01.01  Shutdown ETRACS Server 
+    01.02  Backup {ETRACS_SERVER} folder 
+    01.03  Backup ETRACS main database 
+
+
+02. Go to "{ETRACS_SERVER}/workspace/services/modules/" folder 
+
+    02.01  Delete the following folders if exist: 
+
+           * 01-rameses-enterprise-admin-services.jar
+           * 02-desktop-client-services.jar
+           * 02-mobile-client-services.jar
+           * 02-web-client-services.jar
+           * 03-rameses-rule-services.jar
+           * 03-rameses-workflow-services.jar
+           * rameses-enterprise-services.jar
+           * rameses-enterprise-entity-services.jar
+           * rameses-enterprise-financial-services.jar
+           * rameses-treasury-common-services.jar
+
+ 
+03. Go to "{ETRACS_SERVER}/workspace/services/modules/etracs/" folder 
+
+    03.01  Delete the following folders if exist: 
+
+           * rameses-gov-etracs-1_87-bridge.jar
+           * rameses-gov-etracs-2_2-bridge.jar
+           * rameses-gov-etracs-bpls-online-services.jar
+           * rameses-gov-etracs-bpls-reports-services.jar
+           * rameses-gov-etracs-bpls-services.jar
+           * rameses-gov-etracs-bpls-tool-services.jar
+           * rameses-gov-etracs-bpls-tracs-bridge-services.jar
+           * rameses-gov-etracs-entity-services.jar
+           * rameses-gov-etracs-online-services.jar
+           * rameses-gov-etracs-sre-report-services.jar
+           * rameses-gov-etracs-tools.jar
+           * rameses-gov-lgu-services.jar
+           * rameses-gov-lgu-treasury-services.jar
+           * rameses-gov-treasury-report-services.jar
+           * rameses-gov-treasury-services.jar
+           * rameses-gov-treasury-tool-services.jar
+           * signatorytemplate-services.jar
+
+
+04. Go to "{ETRACS_SERVER}/workspace/services/modules/notification/" folder 
+
+    04.01  Delete the following folders if exist: 
+
+           * client-notification-services.jar
+           * rameses-notification-proxy-services.jar
+           * rameses-notification-services.jar
+           * sms-notification-services.jar
+
+
+05. Go to "{ETRACS_SERVER}/workspace/services/modules/plugins/" folder 
+
+    05.01  Delete the following folders if exist: 
+
+           * rameses-queue-services.jar
+
+
+06. Copy folder "{PATCH_DIR}/lib" to "{ETRACS_SERVER}" folder. 
+    Merge and overwrite existing files and folders. 
+
+07. Copy folder "{PATCH_DIR}/workspace" to "{ETRACS_SERVER}" folder. 
+    Merge and overwrite existing files and folders. 
+
+
+08. Open SQLYog/SQL Studio/Navicat 
+
+    08.01 Connect to etracs main database  
+    08.02 Execute the following sql script files: 
+          
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_01.sql
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_eor.sql
+
+
+09. Start ETRACS Server 
+
+10. Close all etracs client and open a new one to download all updates 
+
+11. Test all Treasury features
+
+12. Test the printing of receipts if data is properly targeted
+
+13. Test all BPLS features
+
+14. Monitoring on the new updates...
