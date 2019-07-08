@@ -74,30 +74,40 @@
            * rameses-queue-services.jar
 
 
-06. Copy folder "{PATCH_DIR}/lib" to "{ETRACS_SERVER}" folder. 
+06. Go to "{ETRACS_SERVER}/workspace/services/apps/etracs25/modules/" folder 
+
+    06.01  Delete the following folders if exist: 
+
+           * rameses-gov-etracs-sre-report-services.jar
+
+
+07. Copy folder "{PATCH_DIR}/lib" to "{ETRACS_SERVER}" folder. 
     Merge and overwrite existing files and folders. 
 
-07. Copy folder "{PATCH_DIR}/workspace" to "{ETRACS_SERVER}" folder. 
+08. Copy folder "{PATCH_DIR}/workspace" to "{ETRACS_SERVER}" folder. 
     Merge and overwrite existing files and folders. 
 
 
-08. Open SQLYog/SQL Studio/Navicat 
+09. Open SQLYog/SQL Studio/Navicat 
 
-    08.01 Connect to etracs main database  
-    08.02 Execute the following sql script files: 
+    09.01 Connect to etracs main database  
+    09.02 Execute the following sql script files: 
           
           * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_01.sql
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_02.sql
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_03_roles.sql
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_04_views.sql
           * {PATCH_DIR}/res/scripts/sqlserver/patch_eor.sql
 
 
-09. Start ETRACS Server 
+10. Start ETRACS Server 
 
-10. Close all etracs client and open a new one to download all updates 
+11. Close all etracs client and open a new one to download all updates 
 
-11. Test all Treasury features
+12. Test all Treasury features
 
-12. Test the printing of receipts if data is properly targeted
+13. Test the printing of receipts if data is properly targeted
 
-13. Test all BPLS features
+14. Test all BPLS features
 
-14. Monitoring on the new updates...
+15. Monitoring on the new updates...
