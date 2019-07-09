@@ -97,6 +97,7 @@
           * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_02.sql
           * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_03_roles.sql
           * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_04_views.sql
+          * {PATCH_DIR}/res/scripts/sqlserver/patch_etracs_05_sre.sql
           * {PATCH_DIR}/res/scripts/sqlserver/patch_eor.sql
 
 
